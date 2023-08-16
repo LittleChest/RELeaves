@@ -1,0 +1,193 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: LittleChest <81231195+LittleChest@users.noreply.github.com>
+Date: Wed, 16 Aug 2023 12:05:14 +0800
+Subject: [PATCH] RELeaves
+
+
+diff --git a/build.gradle.kts b/build.gradle.kts
+index 3f3e60ecbd24c1c40ebbdaec7402192e111f5407..e597e0e372335a34cfdedb10a34185fe79329470 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -13,7 +13,7 @@ configurations.named(log4jPlugins.compileClasspathConfigurationName) {
+ val alsoShade: Configuration by configurations.creating
+ 
+ dependencies {
+-	implementation(project(":leaves-api")) // Leaves
++	implementation(project(":releaves-api")) // RELeaves // Leaves
+ 	// Leaves start
+ 	implementation("io.papermc.paper:paper-mojangapi:1.20.1-R0.1-SNAPSHOT") {
+ 		exclude("io.papermc.paper", "paper-api")
+@@ -71,7 +71,6 @@ tasks.withType<JavaCompile> {
+     compilerArgs.add("-Xlint:-module")
+     compilerArgs.add("-Xlint:-removal")
+     compilerArgs.add("-Xlint:-dep-ann")
+-    compilerArgs.add("--add-modules=jdk.incubator.vector") // Leaves - SIMD support
+ }
+ // Leaves end - hide irrelevant compilation warnings
+ 
+@@ -87,7 +86,7 @@ tasks.jar {
+         attributes(
+             "Main-Class" to "org.bukkit.craftbukkit.Main",
+             "Implementation-Title" to "CraftBukkit",
+-            "Implementation-Version" to "git-Leaves-$implementationVersion",
++            "Implementation-Version" to "git-RELeaves-$implementationVersion", // RELeaves
+             "Implementation-Vendor" to date, // Paper
+             "Specification-Title" to "Bukkit",
+             "Specification-Version" to project.version,
+@@ -189,8 +188,6 @@ fun TaskContainer.registerRunTask(
+     minHeapSize = "${memoryGb}G"
+     maxHeapSize = "${memoryGb}G"
+ 
+-    jvmArgs("--add-modules=jdk.incubator.vector") // Leaves - SIMD support
+-
+     doFirst {
+         workingDir.mkdirs()
+     }
+diff --git a/src/main/java/com/destroystokyo/paper/Metrics.java b/src/main/java/com/destroystokyo/paper/Metrics.java
+index 9ce4d3d96d2d5fbde1f0af599209c6c55038fb58..afff37810770c280600b8da75ba6e6ce00400279 100644
+--- a/src/main/java/com/destroystokyo/paper/Metrics.java
++++ b/src/main/java/com/destroystokyo/paper/Metrics.java
+@@ -593,8 +593,8 @@ public class Metrics {
+             boolean logFailedRequests = config.getBoolean("logFailedRequests", false);
+             // Only start Metrics, if it's enabled in the config
+             if (config.getBoolean("enabled", true)) {
+-                // Leaves start - we have our own bstats page
+-                Metrics metrics = new Metrics("Leaves", serverUUID, logFailedRequests, Bukkit.getLogger());
++                // RELeaves start - we have our own bstats page
++                Metrics metrics = new Metrics("RELeaves", serverUUID, logFailedRequests, Bukkit.getLogger());
+ 
+                 metrics.addCustomChart(new Metrics.SimplePie("minecraft_version", () -> {
+                     String minecraftVersion = Bukkit.getVersion();
+@@ -602,10 +602,10 @@ public class Metrics {
+                     return minecraftVersion;
+                 }));
+ 
+-                metrics.addCustomChart(new Metrics.SimplePie("leaves_version", () -> {
++                metrics.addCustomChart(new Metrics.SimplePie("releaves_version", () -> {
+                     String serverVersion = Bukkit.getVersion();
+                     if (!serverVersion.startsWith("null")) {
+-                        String gitHash = serverVersion.substring("git-Leaves-".length()).split("[-\\s]")[0].replaceAll("\"", "");
++                        String gitHash = serverVersion.substring("git-RELeaves-".length()).split("[-\\s]")[0].replaceAll("\"", "");
+                         return "git-Leaves-" + Bukkit.getMinecraftVersion() + "-" + gitHash;
+                     }
+                     return "unknown";
+@@ -648,7 +648,7 @@ public class Metrics {
+ 
+                     return map;
+                 }));
+-                // Leaves end - we have our own bstats page
++                // RELeaves end - we have our own bstats page
+             }
+         }
+     }
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 75a73d5797dd9655b646de00435d750c5fc63f68..e07baeb94d4d5dbb0d813bde32ffa1fabd074739 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -1718,7 +1718,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+ 
+     @DontObfuscate
+     public String getServerModName() {
+-        return "Leaves"; // Leaves - Leaves > //Paper - Paper > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
++        return "RELeaves"; // RELeaves - RELeaves > // Leaves - Leaves > //Paper - Paper > // Spigot - Spigot > // CraftBukkit - cb > vanilla!
+     }
+ 
+     public SystemReport fillSystemReport(SystemReport details) {
+diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
+index 06cf3bbf50b941d3504de7198c5ca44ed5af2ff0..678a74051acf16a6a0a80502d0ac24c7e4caf085 100644
+--- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
++++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
+@@ -226,6 +226,8 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
+ 
+         com.destroystokyo.paper.Metrics.PaperMetrics.startMetrics(); // Leaves - down
+ 
++        com.destroystokyo.paper.Metrics.PaperMetrics.startMetrics(); // Leaves - down
++
+         this.setPvpAllowed(dedicatedserverproperties.pvp);
+         this.setFlightAllowed(dedicatedserverproperties.allowFlight);
+         this.setMotd(dedicatedserverproperties.motd);
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 6bd1ef55b2d171025132ccb158fe51638267f28c..dd1f718a9020341407eae3b7f53939c1e1dd2d79 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -267,7 +267,7 @@ import javax.annotation.Nullable; // Paper
+ import javax.annotation.Nonnull; // Paper
+ 
+ public final class CraftServer implements Server {
+-    private final String serverName = "Leaves"; // Leaves // Paper
++    private final String serverName = "RELeaves"; // RELeaves // Leaves // Paper
+     private final String serverVersion;
+     private final String bukkitVersion = Versioning.getBukkitVersion();
+     private final Logger logger = Logger.getLogger("Minecraft");
+diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
+index 4760b943da08771a42fcb22eba4d586df414e388..19157dce1e518bfa3e29f142416fdc37cef43607 100644
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -300,7 +300,7 @@ public class Main {
+                     if (buildDate.before(deadline.getTime())) {
+                         // Paper start - This is some stupid bullshit
+                         System.err.println("*** Warning, you've not updated in a while! ***");
+-                        System.err.println("*** Please download a new build as per instructions from https://leavesmc.top/downloads/leaves ***"); //Paper // Leaves
++                        System.err.println("*** Please download a new build as per instructions from https://github.com/LittleChest/RELeaves ***"); //Paper // Leaves // RELeaves
+                         //System.err.println("*** Server will start in 20 seconds ***");
+                         //Thread.sleep(TimeUnit.SECONDS.toMillis(20));
+                         // Paper End
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
+index ca166161ef919c559de9cc02bdf435cbfcc972df..dd375e14fd9119affd0a0b580340e5ae8315427c 100644
+--- a/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
++++ b/src/main/java/org/bukkit/craftbukkit/util/Versioning.java
+@@ -11,7 +11,7 @@ public final class Versioning {
+     public static String getBukkitVersion() {
+         String result = "Unknown-Version";
+ 
+-        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/top.leavesmc.leaves/leaves-api/pom.properties"); // Leaves
++        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/top.littlew.releaves/releaves-api/pom.properties"); // Leaves // RELeaves
+         Properties properties = new Properties();
+ 
+         if (stream != null) {
+diff --git a/src/main/java/org/spigotmc/WatchdogThread.java b/src/main/java/org/spigotmc/WatchdogThread.java
+index a803b08d7d1995c263d05eda23dfe4552acae08d..1ffc6e27f33cdab652f9eb2a5ac840bcceb475e2 100644
+--- a/src/main/java/org/spigotmc/WatchdogThread.java
++++ b/src/main/java/org/spigotmc/WatchdogThread.java
+@@ -155,14 +155,14 @@ public final class WatchdogThread extends io.papermc.paper.util.TickThread // Pa
+                 if (isLongTimeout) {
+                 // Paper end
+                 log.log( Level.SEVERE, "------------------------------" );
+-                log.log( Level.SEVERE, "The server has stopped responding! This is (probably) not a Leaves bug." ); // Paper // Leaves
++                log.log( Level.SEVERE, "The server has stopped responding! This is (probably) not a RELeaves bug." ); // Paper // Leaves //RELeaves
+                 log.log( Level.SEVERE, "If you see a plugin in the Server thread dump below, then please report it to that author" );
+                 log.log( Level.SEVERE, "\t *Especially* if it looks like HTTP or MySQL operations are occurring" );
+                 log.log( Level.SEVERE, "If you see a world save or edit, then it means you did far more than your server can handle at once" );
+                 log.log( Level.SEVERE, "\t If this is the case, consider increasing timeout-time in spigot.yml but note that this will replace the crash with LARGE lag spikes" );
+-                log.log( Level.SEVERE, "If you are unsure or still think this is a Leaves bug, please report this to https://github.com/LeavesMC/Leaves/issues" ); // Leaves
++                log.log( Level.SEVERE, "If you are unsure or still think this is a RELeaves bug, please report this to https://github.com/LittleChest/RELeaves/issues" ); // Leaves // RELeaves
+                 log.log( Level.SEVERE, "Be sure to include ALL relevant console errors and Minecraft crash reports" );
+-                log.log( Level.SEVERE, "Leaves version: " + Bukkit.getServer().getVersion() ); // Leaves
++                log.log( Level.SEVERE, "RELeaves version: " + Bukkit.getServer().getVersion() ); // Leaves // RELeaves
+                 //
+                 if ( net.minecraft.world.level.Level.lastPhysicsProblem != null )
+                 {
+@@ -185,12 +185,12 @@ public final class WatchdogThread extends io.papermc.paper.util.TickThread // Pa
+                 // Paper end
+                 } else
+                 {
+-                    log.log(Level.SEVERE, "--- DO NOT REPORT THIS TO LEAVES - THIS IS NOT A BUG OR A CRASH  - " + Bukkit.getServer().getVersion() + " ---"); // Leaves
++                    log.log(Level.SEVERE, "--- DO NOT REPORT THIS TO RELEAVES - THIS IS NOT A BUG OR A CRASH  - " + Bukkit.getServer().getVersion() + " ---"); // Leaves // RELeaves
+                     log.log(Level.SEVERE, "The server has not responded for " + (currentTime - lastTick) / 1000 + " seconds! Creating thread dump");
+                 }
+                 // Paper end - Different message for short timeout
+                 log.log( Level.SEVERE, "------------------------------" );
+-                log.log( Level.SEVERE, "Server thread dump (Look for plugins here before reporting to Leaves!):" ); // Paper // Leaevs
++                log.log( Level.SEVERE, "Server thread dump (Look for plugins here before reporting to RELeaves!):" ); // Paper // Leaevs // RELeaves - wtf Leaevs lol
+                 io.papermc.paper.chunk.system.scheduling.ChunkTaskScheduler.dumpAllChunkLoadInfo(isLongTimeout); // Paper // Paper - rewrite chunk system
+                 this.dumpTickingInfo(); // Paper - log detailed tick information
+                 WatchdogThread.dumpThread( ManagementFactory.getThreadMXBean().getThreadInfo( MinecraftServer.getServer().serverThread.getId(), Integer.MAX_VALUE ), log );
+@@ -206,7 +206,7 @@ public final class WatchdogThread extends io.papermc.paper.util.TickThread // Pa
+                     WatchdogThread.dumpThread( thread, log );
+                 }
+                 } else {
+-                    log.log(Level.SEVERE, "--- DO NOT REPORT THIS TO LEAVES - THIS IS NOT A BUG OR A CRASH ---"); // Leaves
++                    log.log(Level.SEVERE, "--- DO NOT REPORT THIS TO RELEAVES - THIS IS NOT A BUG OR A CRASH ---"); // Leaves // RELeaves
+                 }
+ 
+                 log.log( Level.SEVERE, "------------------------------" );

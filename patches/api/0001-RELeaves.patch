@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: LittleChest <81231195+LittleChest@users.noreply.github.com>
+Date: Wed, 16 Aug 2023 12:10:57 +0800
+Subject: [PATCH] RELeaves
+
+
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index a88c68c089805dcec131f28c9b3471ba34838b22..1b6edaacfce47a1f969fdfd989ff4ec702ccab34 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -2091,6 +2091,14 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
+         }
+ 		// Leaves end - Not supported yet too
+ 
++        // RELeaves start - Not supported yet too
++        @NotNull
++        public org.bukkit.configuration.file.YamlConfiguration getRELeavesConfig()
++        {
++            throw new UnsupportedOperationException("Not supported yet.");
++        }
++        // RELeaves end - Not supported yet too
++
+         /**
+          * Sends the component to the player
+          *
