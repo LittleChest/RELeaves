@@ -27,7 +27,9 @@ jobs:
         git config --global user.email "ci@leavesmc.top"
         git config --global user.name "Leaves CI"
     - name: Apply Patches
-      run: ./gradlew applyPatches
+      run: |
+        chmod +x ./gradlew
+        ./gradlew applyPatches
     - name: Create Paperclip Jar
       run: ./gradlew createReobfPaperclipJar
     - name: Upload Artifact
